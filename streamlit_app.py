@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import streamlit as st
-import seaborn as sns
-import matplotlib.pyplot as plt
+import plotly.express as px
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
@@ -14,7 +13,7 @@ st.write("This app clusters customers based on purchasing behavior using K-Means
 @st.cache_data
 def load_data():
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx"
-    df = pd.read_excel(url)
+    df = pd.read_excel(url, engine="openpyxl")
     return df
 
 df = load_data()
@@ -46,12 +45,12 @@ rfm['Cluster'] = kmeans.fit_predict(rfm_scaled)
 # Display Clustered Data
 st.write("### Clustered Data Sample", rfm.head())
 
-# Visualization
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.scatterplot(x=rfm['Recency'], y=rfm['Monetary'], hue=rfm['Cluster'], palette='viridis', ax=ax)
-plt.xlabel("Recency (days since last purchase)")
-plt.ylabel("Monetary Value (Total Spend)")
-plt.title("Customer Clusters")
-st.pyplot(fig)
+# Interactive Scatter Plot using Plotly
+fig = px.scatter(rfm, x="Recency", y="Monetary", color=rfm["Cluster"].astype(str), 
+                 title="Customer Clusters",
+                 labels={"Cluster": "Customer Segment"},
+                 hover_data=rfm.columns)
+
+st.plotly_chart(fig)
 
 st.write("Move the slider to change the number of clusters dynamically.")
