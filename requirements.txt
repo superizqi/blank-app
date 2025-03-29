@@ -6,3 +6,12 @@ plotly
 streamlit
 openpyxl
 sweetviz
+pandas
+numpy
+scikit-learn
+streamlit
+plotly
+openpyxl
+nltk
+gensim
+
