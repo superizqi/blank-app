@@ -2,12 +2,14 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
+import sweetviz as sv
+import tempfile
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 # Title
-st.title("Customer Segmentation with Clustering")
-st.write("This app clusters customers based on purchasing behavior using K-Means.")
+st.title("Customer Segmentation & Exploratory Data Analysis")
+st.write("This app clusters customers based on purchasing behavior using K-Means and provides an EDA report.")
 
 # Load Dataset
 @st.cache_data
@@ -45,7 +47,7 @@ rfm['Cluster'] = kmeans.fit_predict(rfm_scaled)
 # Display Clustered Data
 st.write("### Clustered Data Sample", rfm.head())
 
-# Interactive Scatter Plot using Plotly
+# Scatter Plot for Clustering
 fig = px.scatter(rfm, x="Recency", y="Monetary", color=rfm["Cluster"].astype(str), 
                  title="Customer Clusters",
                  labels={"Cluster": "Customer Segment"},
@@ -53,4 +55,21 @@ fig = px.scatter(rfm, x="Recency", y="Monetary", color=rfm["Cluster"].astype(str
 
 st.plotly_chart(fig)
 
-st.write("Move the slider to change the number of clusters dynamically.")
+# Additional EDA Plots
+st.write("### Distribution of RFM Features")
+
+# Histogram
+fig_hist = px.histogram(rfm, x=["Recency", "Frequency", "Monetary"], title="Histogram of RFM Features", barmode="overlay")
+st.plotly_chart(fig_hist)
+
+# Boxplot
+fig_box = px.box(rfm, x="Cluster", y="Monetary", color="Cluster",
+                 title="Boxplot of Monetary Value per Cluster")
+st.plotly_chart(fig_box)
+
+# Generate EDA Report using Sweetviz
+st.write("### Automated Exploratory Data Analysis Report")
+with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_file:
+    report = sv.analyze(rfm)
+    report.show_html(tmp_file.name)
+    st.download_button(label="Download EDA Report", data=open(tmp_file.name, "rb").read(), file_name="eda_report.html", mime="text/html")
